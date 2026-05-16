@@ -14,6 +14,7 @@ auth = None
 
 # AUTH_TYPE mühit dəyişəninə görə uyğun klası yükləyirik
 # AUTH_TYPE mühit dəyişəninə görə uyğun klası yükləyirik
+# AUTH_TYPE mühit dəyişəninə görə uyğun klası yükləyirik
 auth_type = getenv("AUTH_TYPE")
 if auth_type == "auth":
     from api.v1.auth.auth import Auth
@@ -21,6 +22,9 @@ if auth_type == "auth":
 elif auth_type == "basic_auth":
     from api.v1.auth.basic_auth import BasicAuth
     auth = BasicAuth()
+elif auth_type == "session_auth":
+    from api.v1.auth.session_auth import SessionAuth
+    auth = SessionAuth()
 
 @app.before_request
 def before_request_func():
