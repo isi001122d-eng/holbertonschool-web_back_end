@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """ Basic Authentication module """
+import base64
 from api.v1.auth.auth import Auth
 
 
@@ -18,5 +19,23 @@ class BasicAuth(Auth):
         if not authorization_header.startswith("Basic "):
             return None
 
-        # 'Basic ' (6 simvol) hissəsini kəsib geridə qalan mətni qaytarırıq
         return authorization_header[6:]
+
+    def decode_base64_authorization_header(
+        self,
+        base64_authorization_header: str
+    ) -> str:
+        """ Decodes a Base64 string into a UTF-8 string """
+        if base64_authorization_header is None:
+            return None
+        if not isinstance(base64_authorization_header, str):
+            return None
+
+        try:
+            # Base64 string-i əvvəlcə baytlara çevirib decode edirik
+            decoded_bytes = base64.b64decode(base64_authorization_header, validate=True)
+            # Baytları normal UTF-8 mətninə çeviririk
+            return decoded_bytes.decode('utf-8')
+        except Exception:
+            # Əgər hər hansı bir xəta baş verərsə (düzgün base64 deyilsə) None qaytarırıq
+            return None
