@@ -15,11 +15,9 @@ class Auth:
         if not excluded_paths or len(excluded_paths) == 0:
             return True
 
-        # Slash tolerant: path-in sonuna slash əlavə edib yoxlamaq üçün təmizləyirik
         normalized_path = path if path.endswith('/') else path + '/'
 
         for excluded in excluded_paths:
-            # Siyahıdakı hər bir istisnanın da sonuna slash zəmanəti veririk
             normalized_excluded = excluded if excluded.endswith('/') else excluded + '/'
             if normalized_path == normalized_excluded:
                 return False
@@ -28,7 +26,11 @@ class Auth:
 
     def authorization_header(self, request=None) -> str:
         """ Public method to get authorization header """
-        return None
+        if request is None:
+            return None
+        
+        # Request header-lərindən 'Authorization' bərabərliyini götürürük
+        return request.headers.get('Authorization')
 
     def current_user(self, request=None) -> TypeVar('User'):
         """ Public method to get current user """
