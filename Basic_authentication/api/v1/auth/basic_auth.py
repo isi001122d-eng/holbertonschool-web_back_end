@@ -2,6 +2,8 @@
 """ Basic Authentication module """
 import base64
 from api.v1.auth.auth import Auth
+from models.user import User
+from typing import TypeVar
 
 
 class BasicAuth(Auth):
@@ -32,13 +34,11 @@ class BasicAuth(Auth):
             return None
 
         try:
-            # Base64 string-i əvvəlcə baytlara çevirib decode edirik
             decoded_bytes = base64.b64decode(base64_authorization_header, validate=True)
-            # Baytları normal UTF-8 mətninə çeviririk
             return decoded_bytes.decode('utf-8')
         except Exception:
-            # Əgər hər hansı bir xəta baş verərsə (düzgün base64 deyilsə) None qaytarırıq
             return None
+
     def extract_user_credentials(
         self,
         decoded_base64_authorization_header: str
@@ -51,7 +51,33 @@ class BasicAuth(Auth):
         if ":" not in decoded_base64_authorization_header:
             return None, None
 
-        # split(':', 1) yazırıq ki, əgər şifrənin öz daxilində də : işarəsi olarsa,
-        # mətni səhvən çox parçaya bölməsin, yalnız ilk tapdığı : işarəsindən bölsün.
         parts = decoded_base64_authorization_header.split(':', 1)
         return parts[0], parts[1]
+
+    def user_object_from_credentials(
+        self,
+        user_email: str,
+        user_pwd: str
+    ) -> TypeVar('User'):
+        """ Returns the User instance based on his email and password """
+        if user_email is None or not isinstance(user_email, str):
+            return None
+        if user_pwd is None or not isinstance(user_pwd, str):
+            return None
+
+        try:
+            # Email-ə görə istifadəçiləri axtarırıq
+            users = User.search({"email": user_email})
+        except Exception:
+            return None
+
+        # Əgər heç bir istifadəçi tapılmayıbsa
+        if not users or len(users) == 0:
+            return None
+
+        # Tapılan ilk istifadəçini götürürük və şifrəsini yoxlayırıq
+        user = users[0]
+        if not user.is_valid_password(user_pwd):
+            return None
+
+        return user
