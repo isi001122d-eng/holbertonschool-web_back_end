@@ -81,3 +81,30 @@ class BasicAuth(Auth):
             return None
 
         return user
+    def current_user(self, request=None) -> TypeVar('User'):
+        """ Overloads Auth.current_user to retrieve the User instance """
+        if request is None:
+            return None
+
+        # 1. Header-i götür
+        auth_header = self.authorization_header(request)
+        if auth_header is None:
+            return None
+
+        # 2. Base64 hissəsini ayır
+        base64_header = self.extract_base64_authorization_header(auth_header)
+        if base64_header is None:
+            return None
+
+        # 3. Mətni deşifrə (decode) et
+        decoded_header = self.decode_base64_authorization_header(base64_header)
+        if decoded_header is None:
+            return None
+
+        # 4. Email və şifrəni çıxart
+        email, password = self.extract_user_credentials(decoded_header)
+        if email is None or password is None:
+            return None
+
+        # 5. İstifadəçi obyektini bazadan tap və qaytar
+        return self.user_object_from_credentials(email, password)
