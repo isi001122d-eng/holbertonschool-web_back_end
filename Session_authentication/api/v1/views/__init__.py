@@ -9,3 +9,6 @@ from api.v1.views.index import *
 from api.v1.views.users import *
 
 User.load_from_file()
+
+# Faylın mövcud kodlarının ən sonuna bunu yapışdır:
+from api.v1.views.session_auth import *
