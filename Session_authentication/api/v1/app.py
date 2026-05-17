@@ -28,28 +28,35 @@ elif auth_type == "session_auth":
 
 @app.before_request
 def before_request_func():
-    """ Filter each request before processing """
+    """ Filter each request before processing
+    """
     if auth is None:
         return
 
+    # 1. İstisna yollara login endpoint-ini də əlavə edirik
     excluded_paths = [
         '/api/v1/status/',
         '/api/v1/unauthorized/',
-        '/api/v1/forbidden/'
+        '/api/v1/forbidden/',
+        '/api/v1/auth_session/login/'
     ]
 
     if not auth.require_auth(request.path, excluded_paths):
         return
 
-    if auth.authorization_header(request) is None:
+    # 2. Həm Header, həm də Cookie eyni anda None-dırsa -> abort(401)
+    if auth.authorization_header(request) is None and \
+       auth.session_cookie(request) is None:
         abort(401)
 
-    # current_user-i tapırıq
+    # İndiki istifadəçini tapırıq
     user = auth.current_user(request)
     if user is None:
         abort(403)
-    
-    # Tapılan istifadəçini request obyektinə bağlayırıq (Tələb olunan hissə)
+
+    request.current_user = user
+
+# Tapılan istifadəçini request obyektinə bağlayırıq (Tələb olunan hissə)
     request.current_user = user
 
 
