@@ -2,6 +2,7 @@
 """ Authentication management module """
 from flask import request
 from typing import List, TypeVar
+from os import getenv
 
 
 class Auth:
@@ -35,3 +36,17 @@ class Auth:
     def current_user(self, request=None) -> TypeVar('User'):
         """ Public method to get current user """
         return None
+
+    def session_cookie(self, request=None):
+        """ Returns a cookie value from a request
+        """
+        if request is None:
+            return None
+
+        # Mühit dəyişənindən kuki adını götürürük (məsələn, '_my_session_id')
+        cookie_name = getenv('SESSION_NAME')
+        if cookie_name is None:
+            return None
+
+        # .get() metodunu mütləq şəkildə istifadə edərək kuki dəyərini qaytarırıq
+        return request.cookies.get(cookie_name)
