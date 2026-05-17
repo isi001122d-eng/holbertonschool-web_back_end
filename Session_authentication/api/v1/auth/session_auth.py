@@ -47,3 +47,27 @@ class SessionAuth(Auth):
 
         # 3. User ID vasitəsilə bazadan real istifadəçini çəkirik
         return User.get(user_id)
+
+    def destroy_session(self, request=None) -> bool:
+        """ Deletes the user session / logout
+        """
+        if request is None:
+            return False
+
+        # 1. Sorğudan session ID-ni götürürük
+        session_id = self.session_cookie(request)
+        if session_id is None:
+            return False
+
+        # 2. Bu session ID-yə bağlı istifadəçi olub-olmadığını yoxlayırıq
+        user_id = self.user_id_for_session_id(session_id)
+        if user_id is None:
+            return False
+
+        # 3. Session ID-ni yaddaşdakı lüğətdən silirik
+        try:
+            del self.user_id_by_session_id[session_id]
+        except Exception:
+            return False
+
+        return True

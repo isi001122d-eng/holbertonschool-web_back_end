@@ -46,3 +46,17 @@ def session_login() -> str:
     response.set_cookie(cookie_name, session_id)
 
     return response
+
+@app_views.route('/auth_session/logout', methods=['DELETE'], strict_slashes=False)
+def session_logout() -> str:
+    """ DELETE /api/v1/auth_session/logout
+    """
+    # Zəncirvari import xətasının qarşısını almaq üçün daxildə import edirik
+    from api.v1.app import auth
+
+    # Sessiyanı silməyə cəhd edirik
+    if not auth.destroy_session(request):
+        abort(404)
+
+    # Uğurlu çıxış olduqda boş JSON və 200 status kodu qaytarırıq
+    return jsonify({}), 200
